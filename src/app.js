@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import express from 'express';
 import http from 'http';
+import cors from 'cors';
 import bodyParser from 'body-parser';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
@@ -29,7 +30,7 @@ connectDB(DB_URL).then(async () => {
   });
   await server.start();
 
-  app.use('/graphql', bodyParser.json({ limit: '50mb' }), expressMiddleware(server));
+  app.use('/graphql', cors(), bodyParser.json({ limit: '50mb' }), expressMiddleware(server));
 
   await new Promise((resolve) => httpServer.listen({ port: PORT || '4000' }, resolve));
   console.log(`🚀 Server ready at http://localhost:${PORT || '4000'}`);
