@@ -1,5 +1,5 @@
-export default {
-  Query: {
-    hello: () => 'world',
-  },
-};
+import userResolver from "./user.resolver.js";
+
+export default [
+  userResolver,
+]
