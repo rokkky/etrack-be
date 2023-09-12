@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon src/app.js"
   },
   "repository": {
     "type": "git",
@@ -25,10 +26,10 @@
     "express-graphql": "^0.12.0",
     "graphql": "^16.8.0",
     "jsonwebtoken": "^9.0.2",
+    "md5": "^2.3.0",
     "mongodb": "^6.0.0",
     "mongoose": "^7.5.0",
-    "passport": "^0.6.0",
-    "passport-jwt": "^4.0.1"
+    "nodemon": "^3.0.1"
   },
   "devDependencies": {
     "eslint": "^7.25.0",

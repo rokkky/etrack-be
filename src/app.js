@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
@@ -10,17 +10,15 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import schemas from './graphql/schemas/index.js';
 import resolvers from './graphql/resolvers/index.js';
 import { connectDB } from './database.js';
-import path from "path";
+import { verifyToken } from './services/auth.service.js';
 
-dotenv.config({path: path.__dirname + '/./../../.env'}); 
+dotenv.config();
 
 const { PORT, DB_URL } = process.env;
 
 connectDB(DB_URL).then(async () => {
   const app = express();
   const httpServer = http.createServer(app);
-
-  // app.use('/graphql', authenticatedToken); //Проверка JWT-токена
 
   // Set up Apollo Server
   const server = new ApolloServer({
@@ -30,8 +28,22 @@ connectDB(DB_URL).then(async () => {
   });
   await server.start();
 
-  app.use('/graphql', cors(), bodyParser.json({ limit: '50mb' }), expressMiddleware(server));
-
-  await new Promise((resolve) => httpServer.listen({ port: PORT || '4000' }, resolve));
-  console.log(`🚀 Server ready at http://localhost:${PORT || '4000'}`);
+  app.use(
+    '/graphql',
+    cors(),
+    bodyParser.json({ limit: '50mb' }),
+    expressMiddleware(server, {
+      context: ({ req }) => {
+        if (req.body.operationName === 'logIn' || req.body.operationName === 'signUp') {
+          return {};
+        }
+        const token = req.headers.authorization || '';
+        const user = verifyToken(token);
+        return { user };
+      },
+    })
+  );
+  const port = PORT || '4000';
+  await new Promise((resolve) => httpServer.listen({ port }, resolve));
+  console.log(`🚀 Server ready at http://localhost:${port}`);
 });
