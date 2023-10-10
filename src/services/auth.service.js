@@ -1,17 +1,20 @@
 import Token from '../models/token.model.js';
 import jwt from 'jsonwebtoken';
+import skip from 'graphql-resolvers';
 import User from '../models/user.model.js';
+import { generateError } from '../utils/graphql-errors.js';
 
 const generateToken = async (user, options) => {
-  const { id, email, username } = user;
+  const { id, email, username, registrationDate } = user;
   const payload = {
     sub: id,
     user: {
       email,
       username,
+      registrationDate
     },
   };
-  return jwt.sign(payload, process.env.SECRET, { ...options, algorithm: 'HS256' });
+  return jwt.sign(payload, process.env.SECRET, { ...options });
 };
 
 const saveToken = async (token, id) => {
@@ -33,10 +36,21 @@ export const generateAuthTokens = async (user) => {
 };
 
 export const verifyToken = async (token) => {
-  const decoded = jwt.verify(token, process.env.SECRET, { algorithms: ['HS256'] });
-  const user = await User.findById(decoded.sub);
-  if (!user) {
-    throw new Error('Not authorized as user');
+  try {
+    const decoded = jwt.verify(token, process.env.SECRET);
+    const user = await User.findById(decoded.sub);
+    if (!user) {
+      generateError('User not authorized', 'UNAUTHENTICATED', 401);
+    }
+    return user;
+  } catch (e) {
+    throw e;
   }
-  return user;
 };
+
+export const isAuthenticated = async (_, args, { user }) => {
+  if (!user) {
+    generateUnauthErr();
+  }
+  skip; 
+}

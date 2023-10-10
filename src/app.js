@@ -33,13 +33,14 @@ connectDB(DB_URL).then(async () => {
     cors(),
     bodyParser.json({ limit: '50mb' }),
     expressMiddleware(server, {
-      context: ({ req }) => {
-        if (req.body.operationName === 'logIn' || req.body.operationName === 'signUp') {
-          return {};
+      context: async ({ req }) => {
+        try {
+          const token = req.headers.authorization.split(' ')[1] || '';
+          const user = await verifyToken(token);
+          return { user };
+        } catch (e) {
+          return {}        
         }
-        const token = req.headers.authorization || '';
-        const user = verifyToken(token);
-        return { user };
       },
     })
   );
