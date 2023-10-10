@@ -2,7 +2,7 @@ import Token from '../models/token.model.js';
 import jwt from 'jsonwebtoken';
 import skip from 'graphql-resolvers';
 import User from '../models/user.model.js';
-import { generateError } from '../utils/graphql-errors.js';
+import { GraphQLError } from 'graphql';
 
 const generateToken = async (user, options) => {
   const { id, email, username, registrationDate } = user;
@@ -40,7 +40,7 @@ export const verifyToken = async (token) => {
     const decoded = jwt.verify(token, process.env.SECRET);
     const user = await User.findById(decoded.sub);
     if (!user) {
-      generateError('User not authorized', 'UNAUTHENTICATED', 401);
+      generateUnauthErr();
     }
     return user;
   } catch (e) {
@@ -53,4 +53,14 @@ export const isAuthenticated = async (_, args, { user }) => {
     generateUnauthErr();
   }
   skip; 
+}
+
+const generateUnauthErr = () => {
+  const err = new GraphQLError('User not authorized', {
+    extensions: {
+      code: 'UNAUTHENTICATED',
+      status: 401
+    },
+  });
+  throw err;
 }

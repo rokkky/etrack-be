@@ -2,9 +2,21 @@ import md5 from 'md5';
 import User from '../../models/user.model.js';
 import { generateAuthTokens, verifyToken } from '../../services/auth.service.js';
 import Token from '../../models/token.model.js';
+import { GraphQLError } from 'graphql';
 import { combineResolvers } from 'graphql-resolvers';
 import { isAuthenticated } from '../../services/auth.service.js';
-import { generateError } from '../../utils/graphql-errors.js';
+
+const generateTokenError = () => {
+  const err = new GraphQLError('User with this token not found', {
+    extensions: {
+      code: 'TOKEN_NOT_FOUND',
+      http: {
+        status: 404,
+      },
+    },
+  });
+  throw err;
+}
 
 export default {
   Query: {
@@ -62,7 +74,7 @@ export default {
           user: user.id,
         });
         if (!refreshToken) {
-          generateError('User with this token not found', 'TOKEN_NOT_FOUND', 404);
+          generateTokenError();
         } else {
           await Token.deleteOne({ id: refreshToken.id });
           const tokens = await generateAuthTokens(user);
