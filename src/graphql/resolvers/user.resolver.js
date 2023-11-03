@@ -1,10 +1,12 @@
 import md5 from 'md5';
 import User from '../../models/user.model.js';
-import { generateAuthTokens, verifyToken } from '../../services/auth.service.js';
+import Category from '../../models/category.model.js';
 import Token from '../../models/token.model.js';
+import { generateAuthTokens, verifyToken } from '../../services/auth.service.js';
 import { GraphQLError } from 'graphql';
 import { combineResolvers } from 'graphql-resolvers';
 import { isAuthenticated } from '../../services/auth.service.js';
+import { DEFAULT_CATEGORIES } from '../../constants/default-categories.js'
 
 const generateTokenError = () => {
   const err = new GraphQLError('User with this token not found', {
@@ -47,12 +49,20 @@ export default {
       try {
         const isEmailExist = await User.findOne({ email });
         if (isEmailExist) throw new Error('User with the same email already exist!');
-        await User.create({
+        const user = await User.create({
           username: username || 'Unknown',
           email,
           password: md5(password + process.env.PASSWORD_SALT),
           registrationDate: new Date(),
         });
+        const promises = [];
+        DEFAULT_CATEGORIES.forEach(category => {
+          promises.push(Category.create({
+            ...category,
+            user,
+          }))
+        });
+        await Promise.all(promises);
         return true;
       } catch (e) {
         return e;
