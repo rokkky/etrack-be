@@ -1,4 +1,6 @@
 import userSchema from '../schemas/user.schema.js';
+import categorySchema from './category.schema.js';
+import transactionSchema from './transaction.schema.js';
 
 const requestSchema = `#graphql
     scalar Date
@@ -10,6 +12,11 @@ const requestSchema = `#graphql
     type Mutation {
         _: Boolean
     }
-`
+`;
 
-export default [requestSchema, userSchema];
+export default [
+    requestSchema, 
+    userSchema, 
+    categorySchema, 
+    transactionSchema
+];
