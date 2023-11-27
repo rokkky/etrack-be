@@ -13,4 +13,14 @@ export default {
       }
     }),
   },
+  Mutation: {
+    createCategory: combineResolvers(isAuthenticated, async (_, { input }) => {
+      try {
+        const category = await Category.create(input);
+        return category;
+      } catch (e) {
+        return e;
+      }
+    }),
+  }
 };
