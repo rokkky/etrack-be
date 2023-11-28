@@ -5,6 +5,8 @@ export default `#graphql
 
     extend type Mutation {
         createTransaction(input: CreateTransactionInput): Transaction!
+        editTransaction(input: EditTransactionInput): Transaction!
+        deleteTransaction(id: ID): Boolean!
     }
 
     type TransactionsList {
@@ -28,6 +30,16 @@ export default `#graphql
     } 
 
     input CreateTransactionInput {
+        date: Date!
+        amount: Float!
+        description: String!
+        user: ID!
+        type: String!
+        category: ID!
+    }
+
+    input EditTransactionInput {
+        id: ID!
         date: Date!
         amount: Float!
         description: String!
