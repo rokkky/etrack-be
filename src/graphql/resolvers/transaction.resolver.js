@@ -32,5 +32,22 @@ export default {
         return e;
       }
     }),
+    editTransaction: combineResolvers(isAuthenticated, async (_, { input }) => {
+      try {
+        const transaction = await Transaction.findByIdAndUpdate(input.id, input, {new: true});
+        await transaction.populate('category');
+        return transaction;
+      } catch (e) {
+        return e;
+      }
+    }),
+    deleteTransaction: combineResolvers(isAuthenticated, async (_, { id }) => {
+      try {
+        await Transaction.findByIdAndDelete(id);
+        return true;
+      } catch (e) {
+        return e;
+      }
+    }),
   },
 };
